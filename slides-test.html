@@ -1,0 +1,117 @@
+<!doctype html><html lang="en"><head>
+    <meta charset="utf-8" />
+	<meta name="description" content="example slide show">
+	<meta name="keywords" content="html, php, javascript, sample code">
+	<title>slide show widget</title>
+
+	<!--
+		SlideShow object class is common to multiple slide shows that can each reside on
+		different serves yet appear on this same web page.
+
+		To avoid duplicarion you could put this in a .js script file and you may wish to
+		extend finctionality with slide timers and touch device methods
+		(e.g. swipe next or previous).
+	-->
+	<script>
+		// ------------------------ image viewer (slideshow) ------------------------
+		function SlideShow(display, root, images) {
+	// alert("SlideShow("+display+", "+root+", "+images);
+			this.ix = 0;
+			this.display = display;
+			this.page = display+"_page";
+			this.root = root;
+	// alert("images="+images);
+			this.images = images;
+			if (images.length < 1) return;
+			
+			// handle option attribute of the document's image element
+			// e is to start with the last image (rather than the first)
+			// r is to reverse the sequence of the images (which is alphabetical file name)
+			e = document.getElementById(this.display);
+			if (e != null) {
+				o = e.getAttribute("options");
+				if (o == null) o = ""; // default options
+	// alert("options="+o);
+				// 'e' = start at end
+				if (o.indexOf('e') >= 0) this.ix = images.length - 1;
+				if (o.indexOf('r') >= 0) this.images.reverse();
+			}
+			this.show();
+		}
+		
+		SlideShow.prototype.show = function() {			
+			e = document.getElementById(this.page);
+			if (e != null) { e.innerHTML = " "+(this.ix+1)+" of "+this.images.length; }
+			e = document.getElementById(this.display);
+	// alert("images="+this.images);
+			if (e == null) return false;
+			if (this.images.length < 1) return false;
+	//			e.src = ""; //erase display so that you see it refilling (does not work on chrome)
+			e.src = this.root+this.images[this.ix];
+	// alert("src set to "+ e.src);
+			return true;
+		};
+		SlideShow.prototype.prev = function() {
+	// alert("prev");
+			if (this.ix < 1) this.ix = this.images.length;
+			--this.ix;
+			return this.show();
+		};
+		SlideShow.prototype.next = function() {
+	// alert("next");
+			if (++this.ix >= this.images.length) this.ix = 0;
+			return this.show();
+		};
+		SlideShow.prototype.set = function(img, offset) {
+			this.ix = this.images.indexOf(img);
+			if (this.ix >= 0) return this.show();
+			e = document.getElementById(this.display);
+			if (e == null) return false;
+			e.src = img;
+			return true;
+		};
+	</script>
+	<!-- note: use whatever style sheet. the settings here are not important -->
+</head><body style="text-align:center; width:720px; margin-left:auto; margin-right:auto;">
+	<h1>slide-show widget</h1>
+
+	<!--
+		this image element, by default named "slides" gets updated with the slides.
+		You can specify a default image as src incase there are no slides.
+		An optional options string can be specified (see script in the header for details)
+	-->
+	<img id="slides"  style="width:100%" src="" alt="slide">
+	
+	<!--
+		create controls for the slide show as suits your web page. 
+		it must call methods prev and next on an object of the same name as the image element id above
+		Of present, an element of that name with _page suffix will be updated to gibe the sequence number.
+	-->
+	<fieldset>
+		<legend>controls</legend>
+		<button onclick="return slides.prev();" type="button">&lt; prev</button>
+		Slide <span id="slides_page" style="margin:auto; "></span>		
+		<button onclick="return slides.next();" type="button">next &gt;</button> 
+	</fieldset>
+
+	<!--
+		php to run on the server hosting the folder of images.
+		By default it looks for the .jpg images in a folder called "slides" and creates a javascript
+		object of that name on the client (as per the script in the header above). I shall include
+		a sample folder with two images with this distribution so that you have a fully working
+		example by uploading this to your web server.
+
+		You can invoke this only after the slides elements on the page have been defined and must do
+		so for each slide show on your web page.
+
+		To keep names unique the parameter ?v=other_name should be specified.
+		You can include a full path and file pattern (beware that most systems are case sensitive)
+		e.g. here is the path I currently use for my selfies show:
+		http://angelica.x10host.com/glob-ss.php/angelica_perduta/*.[jJ][pP][gG]/?v=angelica_perduta
+		
+		Exercise: modify this file so that it displays my selfie show using the php on my server there
+		but otherwise hosting this page as a file on your own computer.
+	-->
+	<script src="glob-ss.php"></script>
+	
+</body></html>
